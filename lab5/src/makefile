@@ -1,8 +1,6 @@
 CC = gcc
 CFLAGS = -pthread
 
-all: $(TARGET)
-
 mutex: mutex.o
 	$(CC) -o mutex mutex.o $(CFLAGS)
 

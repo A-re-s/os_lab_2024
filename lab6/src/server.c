@@ -34,9 +34,9 @@ uint64_t MultModulo(uint64_t a, uint64_t b, uint64_t mod) {
 
 uint64_t Factorial(const struct FactorialArgs *args) {
   uint64_t ans = 1;
-
-  // TODO: your code here
-
+  for (uint64_t i = args->begin; i <= args->end; i++) {
+    ans = MultModulo(ans, i, args->mod);
+  }
   return ans;
 }
 
@@ -156,11 +156,17 @@ int main(int argc, char **argv) {
 
       fprintf(stdout, "Receive: %llu %llu %llu\n", begin, end, mod);
 
+      int start = begin;
+      int chunk_size = (end - begin) / tnum;
+
       struct FactorialArgs args[tnum];
       for (uint32_t i = 0; i < tnum; i++) {
-        // TODO: parallel somehow
-        args[i].begin = 1;
-        args[i].end = 1;
+        int finish = start + chunk_size - 1;
+         if (i == tnum - 1) {
+            finish = end;
+        }
+        args[i].begin = start;
+        args[i].end = finish;
         args[i].mod = mod;
 
         if (pthread_create(&threads[i], NULL, ThreadFactorial,
@@ -168,6 +174,7 @@ int main(int argc, char **argv) {
           printf("Error: pthread_create failed!\n");
           return 1;
         }
+        start = finish + 1;
       }
 
       uint64_t total = 1;
