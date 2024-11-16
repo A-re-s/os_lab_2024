@@ -1,4 +1,5 @@
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,11 +8,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define SERV_PORT 10050
 #define BUFSIZE 100
 #define SADDR struct sockaddr
 
-int main() {
+int main(int argc, char *argv[]) {
   const size_t kSize = sizeof(struct sockaddr_in);
 
   int lfd, cfd;
@@ -27,8 +27,13 @@ int main() {
 
   memset(&servaddr, 0, kSize);
   servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  servaddr.sin_port = htons(SERV_PORT);
+
+  if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0) {
+    perror("bad address");
+    exit(1);
+  }
+
+  servaddr.sin_port = htons(atoi(argv[2]));
 
   if (bind(lfd, (SADDR *)&servaddr, kSize) < 0) {
     perror("bind");

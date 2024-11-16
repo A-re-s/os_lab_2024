@@ -8,12 +8,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define SERV_PORT 20001
 #define BUFSIZE 1024
 #define SADDR struct sockaddr
 #define SLEN sizeof(struct sockaddr_in)
 
-int main() {
+int main(int argc, char **argv) {
   int sockfd, n;
   char mesg[BUFSIZE], ipadr[16];
   struct sockaddr_in servaddr;
@@ -26,8 +25,12 @@ int main() {
 
   memset(&servaddr, 0, SLEN);
   servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  servaddr.sin_port = htons(SERV_PORT);
+   if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0) {
+    perror("bad address");
+    exit(1);
+  }
+
+  servaddr.sin_port = htons(atoi(argv[2]));
 
   if (bind(sockfd, (SADDR *)&servaddr, SLEN) < 0) {
     perror("bind problem");
